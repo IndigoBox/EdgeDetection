@@ -1,4 +1,10 @@
-﻿using System;
+﻿/* Danger, this code is currently a mess!
+ * Everything is disorganized, and not at all commented.
+ * If you wish to make edits, it is recommended you wait
+ * until I comment everything.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -95,7 +101,7 @@ namespace ImageRecognition
             float percentage = percentageInt;
 
             Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-            BitmapData bmpData = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            /*BitmapData bmpData = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
             IntPtr ptr = bmpData.Scan0;
             int bytes = bmpData.Stride * bmp.Height;
             byte[] rgbValues = new byte[bytes];
@@ -106,16 +112,17 @@ namespace ImageRecognition
             byte red = 0;
             byte green = 0;
             byte blue = 0;
-
-            //Color checking = bmp.GetPixel(i, j);
-            /*if (isMatching(checking, img.GetPixel(i, j - 1), percentage) == true
+            */
+            Bitmap img = bmp;
+            Color checking = bmp.GetPixel(i, j);
+            if (isMatching(checking, img.GetPixel(i, j - 1), percentage) == true
                 && isMatching(checking, img.GetPixel(i + 1, j - 1), percentage) == true
                 && isMatching(checking, img.GetPixel(i + 1, j), percentage) == true
                 && isMatching(checking, img.GetPixel(i + 1, j + 1), percentage) == true
                 && isMatching(checking, img.GetPixel(i, j + 1), percentage) == true
                 && isMatching(checking, img.GetPixel(i - 1, j + 1), percentage) == true
                 && isMatching(checking, img.GetPixel(i - 1, j), percentage) == true
-                && isMatching(checking, img.GetPixel(i - 1, j - 1), percentage) == true)*/
+                && isMatching(checking, img.GetPixel(i - 1, j - 1), percentage) == true)
             if(true)
             {
                 returnBool = false;
@@ -160,7 +167,7 @@ namespace ImageRecognition
                 scale = 1;
             }
             Bitmap img = (Bitmap) resizeImage(pic, new Size(pic.Width/scale,pic.Height/scale));
-            img.LockBits(new Rectangle(0, 0, img.Width, img.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Canonical);
+            //img.LockBits(new Rectangle(0, 0, img.Width, img.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Canonical);
             pic2 = new Bitmap(pic.Width/scale, pic.Height/scale);
             //pictureBox2.Image = pic2;
             Bitmap img2 = (Bitmap) pic2;
@@ -208,6 +215,11 @@ namespace ImageRecognition
         {
             HelpForm temp = new HelpForm();
             temp.ShowDialog();
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+
         }
 
     }
