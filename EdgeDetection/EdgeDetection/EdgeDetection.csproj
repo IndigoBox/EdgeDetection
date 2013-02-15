@@ -7,8 +7,8 @@
     <ProjectGuid>{0163D98D-E7E5-4028-8ED8-D81088137E1D}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ImageRecognition</RootNamespace>
-    <AssemblyName>ImageRecognition</AssemblyName>
+    <RootNamespace>EdgeDetection</RootNamespace>
+    <AssemblyName>EdgeDetection</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
@@ -52,7 +52,7 @@
     <ManifestCertificateThumbprint>239B3AB17D1D789431A58FEF3C98D39F450ADB73</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>ImageRecognition_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>EdgeDetection_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -102,7 +102,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <None Include="ImageRecognition_TemporaryKey.pfx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

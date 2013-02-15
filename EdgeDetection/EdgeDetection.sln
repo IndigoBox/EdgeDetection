@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2012 for Windows Desktop
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageRecognition", "ImageRecognition\ImageRecognition.csproj", "{0163D98D-E7E5-4028-8ED8-D81088137E1D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EdgeDetection", "EdgeDetection\EdgeDetection.csproj", "{0163D98D-E7E5-4028-8ED8-D81088137E1D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
