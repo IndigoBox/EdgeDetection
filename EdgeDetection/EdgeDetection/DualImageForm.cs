@@ -1,9 +1,19 @@
-﻿/* Danger, this code is currently a mess!
- * Everything is disorganized, and not at all commented.
- * If you wish to make edits, it is recommended you wait
- * until I comment everything.
+﻿/* 
+ * This program is created by Viktor Koves.
+ * To see licensing information for this program,
+ * please look in the readme file that is in the
+ * github repository. 
+ * 
+ * The github repository can be found at:
+ * https://github.com/vkoves/EdgeDetection
  */
+/*
+ * Current problems:
+ * The edgified image looks pixelated, though it is high res,
+ * because an edge pixel cannot form alone. Due to the algorithm
+*/
 
+//All the imports used
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,17 +30,18 @@ namespace ImageRecognition
 {
     public partial class DualImageForm : Form
     {
-        Image pic;
-        Image pic2;
-        float percentageInt;
+        Image pic; //the first image, which the user loads
+        Image pic2; //the second image, which displays the edges
+        float percentageInt; //the acceptance value, given by the user
 
         public DualImageForm()
         {
             InitializeComponent();
         }
 
-        private static Image resizeImage(Image imgToResize, Size size)
+        private static Image resizeImage(Image imgToResize, Size size) 
         {
+            //this method is used to resize images to a new resolution
             int sourceWidth = imgToResize.Width;
             int sourceHeight = imgToResize.Height;
 
@@ -61,6 +72,8 @@ namespace ImageRecognition
 
         public static Color Mix(Color from, Color to, float percent)
         {
+            //this method is used to mix colors, for a transparency effect
+            //it is not currently used in the program
             float amountFrom = 1.0f - percent;
 
             return Color.FromArgb(
@@ -72,6 +85,10 @@ namespace ImageRecognition
 
         public Boolean isMatching(Color a, Color b, float percent)
         {
+            //this method is used to identify whether two pixels, 
+            //of color a and b match, as in they can be considered
+            //a solid color based on the acceptance value (percent)
+
             Boolean returnBool = false;
             Boolean Rmatches = false;
             Boolean Gmatches = false;
@@ -97,24 +114,22 @@ namespace ImageRecognition
 
         public Boolean isEdge(Bitmap bmp, int i, int j)
         {
-            Boolean returnBool = true;
-            float percentage = percentageInt;
+            //This method determines whether an inputed pixel,
+            //of position (i, j) on the Bitmap bmp, is an edge
+            //it uses the global variable percentageInt when
+            //it calls is matching
+            Boolean returnBool = true; //By default, we say the pixel is
+            //an edge, and we try to disprove it by checking nearby pixels 
+            float percentage = percentageInt; //the percentage used is set
+            //equal to the global variable percentageInt
 
-            Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-            /*BitmapData bmpData = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
-            IntPtr ptr = bmpData.Scan0;
-            int bytes = bmpData.Stride * bmp.Height;
-            byte[] rgbValues = new byte[bytes];
+            Bitmap img = bmp; //creates a new bitmap from the inputted bitmap
+            Color checking = bmp.GetPixel(i, j); //the pixel we are checking
+            //to be an edge is located at (i, j), and thus we fetch the color
+            //in the bitmap at (i, j)
 
-            System.Runtime.InteropServices.Marshal.Copy(ptr,
-                           rgbValues, 0, bytes);
-
-            byte red = 0;
-            byte green = 0;
-            byte blue = 0;
-            */
-            Bitmap img = bmp;
-            Color checking = bmp.GetPixel(i, j);
+            //Here the program checks if all eight nearby pixels match the
+            //pixel that is being checked to be an edge
             if (isMatching(checking, img.GetPixel(i, j - 1), percentage) == true
                 && isMatching(checking, img.GetPixel(i + 1, j - 1), percentage) == true
                 && isMatching(checking, img.GetPixel(i + 1, j), percentage) == true
@@ -123,26 +138,17 @@ namespace ImageRecognition
                 && isMatching(checking, img.GetPixel(i - 1, j + 1), percentage) == true
                 && isMatching(checking, img.GetPixel(i - 1, j), percentage) == true
                 && isMatching(checking, img.GetPixel(i - 1, j - 1), percentage) == true)
-            if(true)
             {
-                returnBool = false;
+                returnBool = false; //if all the nearby pixels match the 
+                //pixel being checked, we say the pixel being check is not
+                //an edge
             }
             return returnBool;
         }
 
-        private void button2_MouseClick(object sender, MouseEventArgs e)
-        {
-            openFileDialog1.Filter = "Image Files (*.jpeg;*.jpg;*.png;*.gif)|(*.jpeg;*.jpg;*.png;*.gif|JPEG Files (*.jpeg)|*.jpeg|PNG Files (*.png)|*.png|JPG Files (*.jpg)|*.jpg|GIF Files (*.gif)|*.gif";
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
-            {
-                pic2 = new Bitmap(openFileDialog1.FileName);
-                pictureBox2.SizeMode = PictureBoxSizeMode.Zoom;
-                pictureBox2.Image = pic2;
-            }
-        }
-
         private void button1_MouseClick(object sender, MouseEventArgs e)
         {
+            //if the "Open" button is pressed, let the user 
             openFileDialog1.Filter = "Image Files (*.jpeg;*.jpg;*.png;*.gif)|(*.jpeg;*.jpg;*.png;*.gif|JPEG Files (*.jpeg)|*.jpeg|PNG Files (*.png)|*.png|JPG Files (*.jpg)|*.jpg|GIF Files (*.gif)|*.gif";
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
@@ -156,23 +162,23 @@ namespace ImageRecognition
             }
         }
 
-        private void button3_MouseClick(object sender, MouseEventArgs e) //ANALYZE
+        private void button3_MouseClick(object sender, MouseEventArgs e)
         {
+            //When the analyze button is pressed
             percentageInt = float.Parse(textBox1.Text);
-            //int scale = pic.Width/pictureBox1.Width /2;
-            int scale = 2;
-            pictureBox2.SizeMode = PictureBoxSizeMode.Zoom;
+            float scale = pic.Width/pictureBox1.Width;
+            scale = scale;
             if (scale == 0)
             {
                 scale = 1;
             }
-            Bitmap img = (Bitmap) resizeImage(pic, new Size(pic.Width/scale,pic.Height/scale));
-            //img.LockBits(new Rectangle(0, 0, img.Width, img.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Canonical);
-            pic2 = new Bitmap(pic.Width/scale, pic.Height/scale);
-            //pictureBox2.Image = pic2;
+
+            int tempWidth = (int) Math.Floor(pic.Width / scale);
+            int tempHeight = (int)Math.Floor(pic.Height / scale);
+
+            Bitmap img = (Bitmap)resizeImage(pic, new Size(tempWidth, tempHeight));
+            pic2 = new Bitmap(tempWidth, tempHeight);
             Bitmap img2 = (Bitmap) pic2;
-            long matchingPixels = 0;
-            Boolean useEdgeDetection = true;
             for (int i = 0; i < img.Width; i++)
             {
                 for (int j = 0; j < img.Height; j++)
@@ -196,31 +202,18 @@ namespace ImageRecognition
                     {
                         img.SetPixel(i, j, Mix(pixel,Color.Red,0.5f));
                     }
-                    
                 }
                 
             }
-            //pictureBox1.Image = img;
-            pictureBox2.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBox2.Image = img2;
-
-        }
-
-        private void DualImageForm_Load(object sender, EventArgs e)
-        {
 
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            HelpForm temp = new HelpForm();
-            temp.ShowDialog();
+            //if the help button is pressed
+            HelpForm temp = new HelpForm(); //create a new help form
+            temp.ShowDialog(); //and show it
         }
-
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
-
-        }
-
     }
 }

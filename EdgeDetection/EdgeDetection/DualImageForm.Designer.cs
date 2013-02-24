@@ -47,7 +47,6 @@
             this.pictureBox1.Size = new System.Drawing.Size(400, 438);
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
-            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
             // 
             // pictureBox2
             // 
@@ -117,7 +116,6 @@
             this.Controls.Add(this.pictureBox1);
             this.Name = "DualImageForm";
             this.Text = "EdgeDetection";
-            this.Load += new System.EventHandler(this.DualImageForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.ResumeLayout(false);
