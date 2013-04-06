@@ -2,7 +2,9 @@
 
 >Lines is a simple edge detection software which analyzes an image
 >and detects edges, which it displays as black pixels in the second 
->image slot.
+>image slot. It is completely open source, and all code for it is 
+>right here on GitHub! To find out more on how you may use Lines,
+>please look at the licensing information.
 
 ###Things I want to do
 
