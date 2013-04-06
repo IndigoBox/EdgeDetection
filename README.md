@@ -1,6 +1,6 @@
-##My program
+##Lines - Open Source Edge Detection
 
->is a simple edge detection software which analyzes an image
+>Lines is a simple edge detection software which analyzes an image
 >and detects edges, which it displays as black pixels in the second 
 >image slot.
 
