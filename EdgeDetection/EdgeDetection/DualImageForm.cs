@@ -169,7 +169,7 @@ namespace ImageRecognition
             float scale = 1; 
             if (comboBox1.SelectedItem == "Auto")
             {
-                scale = pic.Width/pictureBox1.Width;;
+                scale = pic.Width/pictureBox1.Width;
             }
             else if(comboBox1.SelectedItem == "1/2")
             {
@@ -188,8 +188,18 @@ namespace ImageRecognition
                 scale = pic.Width/pictureBox1.Width;
             }
 
-            int tempWidth = (int) Math.Floor(pic.Width / scale);
-            int tempHeight = (int)Math.Floor(pic.Height / scale);
+            int tempWidth = 1;
+            int tempHeight = 1;
+            if (scale >= 1)
+            {
+                tempWidth = (int)Math.Floor(pic.Width / scale);
+                tempHeight = (int)Math.Floor(pic.Height / scale);
+            }
+            else
+            {
+                tempWidth = pic.Width;
+                tempHeight = pic.Height;
+            }
 
             Bitmap img = (Bitmap)resizeImage(pic, new Size(tempWidth, tempHeight));
             pic2 = new Bitmap(tempWidth, tempHeight);
