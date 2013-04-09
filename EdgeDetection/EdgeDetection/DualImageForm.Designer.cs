@@ -36,6 +36,9 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.button2 = new System.Windows.Forms.Button();
+            this.button4 = new System.Windows.Forms.Button();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
@@ -68,7 +71,7 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(905, 51);
+            this.button3.Location = new System.Drawing.Point(905, 95);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(90, 23);
             this.button3.TabIndex = 4;
@@ -102,11 +105,46 @@
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(905, 124);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(90, 23);
+            this.button4.TabIndex = 8;
+            this.button4.Text = "Save";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
+            // comboBox1
+            // 
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Items.AddRange(new object[] {
+            "Auto",
+            "Original",
+            "1/2",
+            "1/4"});
+            this.comboBox1.Location = new System.Drawing.Point(905, 68);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(94, 21);
+            this.comboBox1.TabIndex = 9;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(905, 52);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(57, 13);
+            this.label2.TabIndex = 10;
+            this.label2.Text = "Resolution";
+            // 
             // DualImageForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1007, 462);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.comboBox1);
+            this.Controls.Add(this.button4);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBox1);
@@ -133,5 +171,8 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.Label label2;
     }
 }

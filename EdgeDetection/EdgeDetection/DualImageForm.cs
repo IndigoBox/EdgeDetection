@@ -133,10 +133,10 @@ namespace ImageRecognition
             if (isMatching(checking, img.GetPixel(i, j - 1), percentage) == true
                 && isMatching(checking, img.GetPixel(i + 1, j - 1), percentage) == true
                 && isMatching(checking, img.GetPixel(i + 1, j), percentage) == true
-                && isMatching(checking, img.GetPixel(i + 1, j + 1), percentage) == true
-                && isMatching(checking, img.GetPixel(i, j + 1), percentage) == true
-                && isMatching(checking, img.GetPixel(i - 1, j + 1), percentage) == true
-                && isMatching(checking, img.GetPixel(i - 1, j), percentage) == true
+                //&& isMatching(checking, img.GetPixel(i + 1, j + 1), percentage) == true
+                //&& isMatching(checking, img.GetPixel(i, j + 1), percentage) == true
+                //&& isMatching(checking, img.GetPixel(i - 1, j + 1), percentage) == true
+                //&& isMatching(checking, img.GetPixel(i - 1, j), percentage) == true
                 && isMatching(checking, img.GetPixel(i - 1, j - 1), percentage) == true)
             {
                 returnBool = false; //if all the nearby pixels match the 
@@ -166,11 +166,26 @@ namespace ImageRecognition
         {
             //When the analyze button is pressed
             percentageInt = float.Parse(textBox1.Text);
-            float scale = pic.Width/pictureBox1.Width;
-            scale = scale;
-            if (scale == 0)
+            float scale = 1; 
+            if (comboBox1.SelectedItem == "Auto")
+            {
+                scale = pic.Width/pictureBox1.Width;;
+            }
+            else if(comboBox1.SelectedItem == "1/2")
+            {
+                scale = 2;
+            }
+            else if (comboBox1.SelectedItem == "1/4")
+            {
+                scale = 4;
+            }
+            else if (comboBox1.SelectedItem == "Original")
             {
                 scale = 1;
+            }
+            else
+            {
+                scale = pic.Width/pictureBox1.Width;
             }
 
             int tempWidth = (int) Math.Floor(pic.Width / scale);
@@ -193,8 +208,10 @@ namespace ImageRecognition
                             {
                                 Color nomatch = Color.Black;
                                 img2.SetPixel(i, j, Mix(nomatch, img.GetPixel(i, j), 0f));
-                                img2.SetPixel(i, j, Mix(nomatch, img.GetPixel(i, j), 0f));
-                                
+                            }
+                            else
+                            {
+                                img2.SetPixel(i, j, Mix(Color.White, img.GetPixel(i, j), 0f));
                             }
                         }
                     }
@@ -214,6 +231,43 @@ namespace ImageRecognition
             //if the help button is pressed
             HelpForm temp = new HelpForm(); //create a new help form
             temp.ShowDialog(); //and show it
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            saveFileDialog1.Filter = "JPeg Image|*.jpg|Bitmap Image|*.bmp|Gif Image|*.gif";
+            saveFileDialog1.Title = "Save an Image File";
+            saveFileDialog1.ShowDialog();
+
+            // If the file name is not an empty string open it for saving.
+            if (saveFileDialog1.FileName != "")
+            {
+                // Saves the Image via a FileStream created by the OpenFile method.
+                System.IO.FileStream fs =
+                   (System.IO.FileStream)saveFileDialog1.OpenFile();
+                // Saves the Image in the appropriate ImageFormat based upon the
+                // File type selected in the dialog box.
+                // NOTE that the FilterIndex property is one-based.
+                switch (saveFileDialog1.FilterIndex)
+                {
+                    case 1:
+                        pictureBox2.Image.Save(fs,
+                           System.Drawing.Imaging.ImageFormat.Jpeg);
+                        break;
+
+                    case 2:
+                        pictureBox2.Image.Save(fs,
+                           System.Drawing.Imaging.ImageFormat.Bmp);
+                        break;
+
+                    case 3:
+                        pictureBox2.Image.Save(fs,
+                           System.Drawing.Imaging.ImageFormat.Gif);
+                        break;
+                }
+                fs.Close();
+            }
         }
     }
 }
