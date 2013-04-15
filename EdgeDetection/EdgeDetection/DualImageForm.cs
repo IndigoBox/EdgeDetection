@@ -9,8 +9,7 @@
  */
 /*
  * Current problems:
- * The edgified image looks pixelated, though it is high res,
- * because an edge pixel cannot form alone. Due to the algorithm
+ * Speed. The program runs very slowly compared to other solutions
 */
 
 //All the imports used
@@ -146,7 +145,7 @@ namespace ImageRecognition
             return returnBool;
         }
 
-        private void button1_MouseClick(object sender, MouseEventArgs e)
+        private void button1_MouseClick(object sender, MouseEventArgs e) //Open button
         {
             //if the "Open" button is pressed, let the user 
             openFileDialog1.Filter = "Image Files (*.jpeg;*.jpg;*.png;*.gif)|(*.jpeg;*.jpg;*.png;*.gif|JPEG Files (*.jpeg)|*.jpeg|PNG Files (*.png)|*.png|JPG Files (*.jpg)|*.jpg|GIF Files (*.gif)|*.gif";
@@ -162,7 +161,7 @@ namespace ImageRecognition
             }
         }
 
-        private void button3_MouseClick(object sender, MouseEventArgs e)
+        private void button3_MouseClick(object sender, MouseEventArgs e) //Analyze button
         {
             //When the analyze button is pressed
             percentageInt = float.Parse(textBox1.Text);
@@ -236,14 +235,14 @@ namespace ImageRecognition
 
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void button2_Click(object sender, EventArgs e) //Help Button
         {
             //if the help button is pressed
             HelpForm temp = new HelpForm(); //create a new help form
             temp.ShowDialog(); //and show it
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void button4_Click(object sender, EventArgs e) //Save Button
         {
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
             saveFileDialog1.Filter = "JPeg Image|*.jpg|Bitmap Image|*.bmp|Gif Image|*.gif";
