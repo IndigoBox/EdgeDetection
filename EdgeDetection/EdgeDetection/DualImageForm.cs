@@ -14,7 +14,7 @@
 
 //All the imports used
 using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -34,14 +34,20 @@ namespace ImageRecognition
         Image pic2; //the second image, which displays the edges
         float percentageInt; //the acceptance value, given by the user
         Stopwatch clock;
-        Boolean useLockBits = true;
+        Boolean[,] edgeData;
+        ArrayList edges = new ArrayList();
+        int width;
+        int height;
+        int pixelThresh;
+        Bitmap img;
 
         public DualImageForm()
         {
+            Debug.WriteLine("form loaded");
             InitializeComponent();
         }
 
-        private static Image resizeImage(Image imgToResize, Size size) 
+        private static Image resizeImage(Image imgToResize, Size size)
         {
             //this method is used to resize images to a new resolution
             int sourceWidth = imgToResize.Width;
@@ -72,109 +78,6 @@ namespace ImageRecognition
             return (Image)b;
         }
 
-        public static Color Mix(Color from, Color to, float percent)
-        {
-            //this method is used to mix colors, for a transparency effect
-            //it is not currently used in the program
-            float amountFrom = 1.0f - percent;
-
-            return Color.FromArgb(
-            (byte)(from.A * amountFrom + to.A * percent),
-            (byte)(from.R * amountFrom + to.R * percent),
-            (byte)(from.G * amountFrom + to.G * percent),
-            (byte)(from.B * amountFrom + to.B * percent));
-        }
-
-        public Boolean isMatching(Color a, Color b, float percent)
-        {
-            //this method is used to identify whether two pixels, 
-            //of color a and b match, as in they can be considered
-            //a solid color based on the acceptance value (percent)
-
-            Boolean returnBool = false;
-            Boolean Rmatches = false;
-            Boolean Gmatches = false;
-            Boolean Bmatches = false;
-            if (Math.Abs(a.R - b.R) < percent * 255)
-            {
-                Rmatches = true;
-            }
-            if (Math.Abs(a.G - b.G) < percent * 255)
-            {
-                Gmatches = true;
-            }
-            if (Math.Abs(a.B - b.B) < percent * 255)
-            {
-                Bmatches = true;
-            }
-            if (Rmatches && Bmatches && Gmatches)
-            {
-                returnBool = true;
-            }
-            return returnBool;
-        }
-
-        public Boolean isEdgeOptimized(Color[] colors)
-        {
-            //colors[0] should be the checking pixel
-            Boolean returnBool = true;
-            float percentage = percentageInt; //the percentage used is set
-            //equal to the global variable percentageInt
-            if (isMatching(colors[0], colors[1], percentage) &&
-               isMatching(colors[0], colors[2], percentage) &&
-               isMatching(colors[0], colors[3], percentage) &&
-               //isMatching(colors[0], colors[4], percentage) &&
-               //isMatching(colors[0], colors[5], percentage) &&
-               //isMatching(colors[0], colors[6], percentage) &&
-               //isMatching(colors[0], colors[7], percentage) &&
-               isMatching(colors[0], colors[8], percentage))
-            {
-                returnBool = false;
-            }
-
-            return returnBool;
-        }
-
-        public Boolean isEdge(Bitmap bmp, int i, int j)
-        {
-            //This method determines whether an inputed pixel,
-            //of position (i, j) on the Bitmap bmp, is an edge
-            //it uses the global variable percentageInt when
-            //it calls is matching
-            Boolean returnBool = true; //By default, we say the pixel is
-            //an edge, and we try to disprove it by checking nearby pixels 
-            float percentage = percentageInt; //the percentage used is set
-            //equal to the global variable percentageInt
-
-            Bitmap img = bmp; //creates a new bitmap from the inputted bitmap
-            Color checking = bmp.GetPixel(i, j); //the pixel we are checking
-            //to be an edge is located at (i, j), and thus we fetch the color
-            //in the bitmap at (i, j)
-
-            ///* 
-             
-            ///* 
-            
-            //Here the program checks if all eight nearby pixels match the
-            //pixel that is being checked to be an edge
-
-
-            if (isMatching(checking, img.GetPixel(i, j - 1), percentage) == true
-                && isMatching(checking, img.GetPixel(i + 1, j - 1), percentage) == true
-                && isMatching(checking, img.GetPixel(i + 1, j), percentage) == true
-                //&& isMatching(checking, img.GetPixel(i + 1, j + 1), percentage) == true
-                //&& isMatching(checking, img.GetPixel(i, j + 1), percentage) == true
-                //&& isMatching(checking, img.GetPixel(i - 1, j + 1), percentage) == true
-                //&& isMatching(checking, img.GetPixel(i - 1, j), percentage) == true
-                && isMatching(checking, img.GetPixel(i - 1, j - 1), percentage) == true)
-            {
-                returnBool = false; //if all the nearby pixels match the 
-                //pixel being checked, we say the pixel being check is not
-                //an edge
-            }
-            return returnBool;
-        }
-
         private void button1_MouseClick(object sender, MouseEventArgs e) //Open button
         {
             //if the "Open" button is pressed, let the user 
@@ -187,28 +90,20 @@ namespace ImageRecognition
                 pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
                 pictureBox2.Image = pic2;
                 pictureBox1.Image = pic;
-                
+
             }
         }
 
         private void button3_MouseClick(object sender, MouseEventArgs e) //Analyze button
         {
             clock = Stopwatch.StartNew();
-            if(checkBox1.Checked)
-            {
-                useLockBits = true;
-            }
-            else
-            {
-                useLockBits = false;
-            }
             analyze();
             clock.Stop();
             float time = clock.ElapsedMilliseconds;
-            label3.Text = time/1000 + " sec";
+            label3.Text = time / 1000 + " sec";
         }
 
-        
+
 
         private void button2_Click(object sender, EventArgs e) //Help Button
         {
@@ -254,13 +149,42 @@ namespace ImageRecognition
             }
         }
 
+        private unsafe static bool IsEdgeOptimized(byte* pp, byte* cp, byte* np, int scaledPercent)
+        {
+            return !IsMatching(cp, pp - 3, scaledPercent) &&
+                   //!IsMatching(cp, pp, scaledPercent) &&
+                   //!IsMatching(cp, pp + 3, scaledPercent) &&
+                   //!IsMatching(cp, cp - 3, scaledPercent) &&
+                   //!IsMatching(cp, cp + 3, scaledPercent) &&
+                   //!IsMatching(cp, np - 3, scaledPercent) &&
+                   !IsMatching(cp, np, scaledPercent) &&
+                   !IsMatching(cp, np + 3, scaledPercent);
+        }
+
+        private unsafe static bool IsMatching(byte* p1, byte* p2, int thresh)
+        {
+            if (false)
+            {
+                Debug.WriteLine("Pixel 1: B " + *p1++ + " G " + *p1++ + " R " + *p1++);
+                Debug.WriteLine("Pixel 2: B " + *p2++ + " G " + *p2++ + " R " + *p2++);
+                Debug.WriteLine("thresh " + thresh);
+                Debug.WriteLine(Math.Abs(*p1++ - *p2++) < thresh && Math.Abs(*p1++ - *p2++) < thresh && Math.Abs(*p1++ - *p2++) < thresh);
+            }
+            return Math.Abs(*p1++ - *p2++) < thresh && Math.Abs(*p1++ - *p2++) < thresh && Math.Abs(*p1++ - *p2++) < thresh;
+            //return true;
+        }
+
+        private void button5_MouseClick(object sender, MouseEventArgs e)
+        {
+            pixelThresh = int.Parse(textBox2.Text);
+            separateEdges();
+        }
+
         private void analyze()
         {
             //When the analyze button is pressed
             percentageInt = float.Parse(textBox1.Text);
             float scale = 1;
-
-
 
             if (comboBox1.SelectedItem == "Auto")
             {
@@ -296,96 +220,215 @@ namespace ImageRecognition
                 tempHeight = pic.Height;
             }
 
-            Bitmap img = (Bitmap)resizeImage(pic, new Size(tempWidth, tempHeight));
+            width = pic.Width;
+            height = pic.Height;
+            edgeData = new Boolean[pic.Width, pic.Height];
+
+            img = (Bitmap)resizeImage(pic, new Size(tempWidth, tempHeight));
             pic2 = new Bitmap(tempWidth, tempHeight);
             Bitmap img2 = (Bitmap)pic2;
             Color[] pixels = null;
-            if (useLockBits)
-            {
-
-                BitmapData bmd = img.LockBits(new Rectangle(0, 0, img.Width, img.Height),
-                 System.Drawing.Imaging.ImageLockMode.ReadOnly, img.PixelFormat);
-
-                // Get the address of the first line.
-                IntPtr ptr = bmd.Scan0;
-
-                // Declare an array to hold the bytes of the bitmap. 
-                int bytes = Math.Abs(bmd.Stride) * img.Height;
-                byte[] rgbValues = new byte[bytes];
-                //Goes R1, G1, B1, R2, etc!
-
-                // Copy the RGB values into the array.
-                System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes);
-
-                pixels = new Color[bytes / 4];
-                for (int z = 0; z < bytes / 4; z++)
-                {
-                    pixels[z] = Color.FromArgb(rgbValues[4 * z + 2], rgbValues[4 * z + 1], rgbValues[4 * z]);
-                }
-
-                img.UnlockBits(bmd);
-
-            }
             
-            for (int i = 0; i < img.Width; i++)
+            BitmapData data = img.LockBits(new Rectangle(0, 0, img.Width, img.Height),
+            ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+            int size = Math.Abs(data.Stride) * img.Height;
+            Byte[] bytes = new byte[size];
+
+            int scaledPercent = (int)(Math.Round(percentageInt * 255));
+            Debug.WriteLine("percent " + scaledPercent);
+            unsafe
             {
-                for (int j = 0; j < img.Height; j++)
-                {
-                    
-                    if (i < img2.Width && j < img2.Height)
+                    Debug.WriteLine("Woah there, unsafe stuff");
+                    byte* prevLine = (byte*)data.Scan0;
+                    byte* currLine = prevLine + data.Stride;
+                    byte* nextLine = currLine + data.Stride;
+
+                    for (int y = 1; y < img.Height - 1; y++)
                     {
-                        if (i - 1 > 1 && j - 1 > 1 && j + 1 < img.Height && i + 1 < img.Width)
+
+                        byte* pp = prevLine + 3;
+                        byte* cp = currLine + 3;
+                        byte* np = nextLine + 3;
+                        for (int x = 1; x < img.Width - 1; x++)
                         {
-                            if (useLockBits)
+                            if (IsEdgeOptimized(pp, cp, np, scaledPercent))
                             {
-                                Color[] temp = new Color[9];
-                                temp[0] = pixels[((j - 1) * img.Width) + i]; //i, j
-                                temp[1] = pixels[((j - 2) * img.Width) + i + 1]; //i + 1, j - 1
-                                temp[2] = pixels[((j - 1) * img.Width) + i + 1]; //i + 1, j
-                                temp[3] = pixels[((j) * img.Width) + i + 1]; //i + 1, j + 1
-                                temp[4] = pixels[((j) * img.Width) + i]; //i, j + 1
-                                temp[5] = pixels[((j) * img.Width) + i - 1]; //i-1, j + 1
-                                temp[6] = pixels[((j - 1) * img.Width) + i - 1]; //i -1, j
-                                temp[7] = pixels[((j - 2) * img.Width) + i - 1]; //i-1, j-1
-                                temp[8] = pixels[((j - 2) * img.Width) + i]; //i, j - 1
-                                if (isEdgeOptimized(temp))
-                                {
-                                    Color nomatch = Color.Black;
-                                    img2.SetPixel(i, j, nomatch);
-                                }
-                                else
-                                {
-                                    img2.SetPixel(i, j, Mix(Color.White, img.GetPixel(i, j), 0f));
-                                }
+                                edgeData[x, y] = true;
+                                //Debug.WriteLine("x " + x + "y " + y);
+                                
+                                //img2.SetPixel(x, y, Color.Black);
+                                //bytes[(y * img.Width + x) * 3 + 2] = 255;
                             }
                             else
                             {
-                                if (isEdge(img, i,j))
-                                {
-                                    Color nomatch = Color.Black;
-                                    img2.SetPixel(i, j, nomatch);
-                                }
-                                else
-                                {
-                                    img2.SetPixel(i, j, Mix(Color.White, img.GetPixel(i, j), 0f));
-                                }
+                                bytes[(y * data.Stride) + (x * 3)] = 255;
+                                bytes[(y * data.Stride) + (x * 3) +1] = 255;
+                                bytes[(y * data.Stride) + (x * 3) + 2] = 255;
+                                //img2.SetPixel(x, y, Color.White);
                             }
-                            //img2.SetPixel(i,j,temp[0]);
+                            pp += 3; cp += 3; np += 3;
                         }
-                    }
-                    else
-                    {
-                       
+                        prevLine = currLine;
+                        currLine = nextLine;
+                        nextLine += data.Stride;
                     }
                 }
+            System.Runtime.InteropServices.Marshal.Copy(bytes, 0, data.Scan0, size);
+            img.UnlockBits(data);
+            pictureBox2.Image = img;
+        } // end analyze
 
+        private void separateEdges()
+        {
+            Boolean red = false;
+            Color temp = Color.Blue;
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (edgeData[x, y])
+                    {
+                        red = !red;
+                        if (red)
+                            temp = Color.Red;
+                        else
+                            temp = Color.Blue;
+                        //cycle clockwise from (x-1, y-1)
+                        int[] next = new int[2]{x,y};
+                        edgeData[next[0], next[1]] = false;
+                        img.SetPixel(next[0], next[1], temp);
+                        while (next != null && next[0] != -1)
+                        {
+                            //Debug.WriteLine("while");
+                            try
+                            {
+                                //Debug.WriteLine("next x " + next[0] + " y " + next[1]);
+                                edgeData[next[0], next[1]] = false;
+                                img.SetPixel(next[0], next[1], temp);
+                            }
+                            catch (IndexOutOfRangeException)
+                            {
+                                Debug.WriteLine("index out of range    x " + next[0] + " y " + next[1]);
+                            }
+                            next = scan(next, pixelThresh);
+                        }
+                    }
+                }
             }
-            pictureBox2.Image = img2;
+            pictureBox1.Image = img;
+        } //end separate
 
+        private int[] scan(int[] temp, int thresh)
+        {
+            
+            int x = temp[0];
+            int y = temp[1];
+            int d = 2;
+            int[] next = new int[2]{-1, -1};
+            //Debug.WriteLine("array " + next[0]);
+            while (next != null && next[0] == -1 &&  d < thresh)
+            {
+                //Debug.WriteLine("scan depth " + d);
+                next = search(x, y, d);
+                if (next == null || next[0] == -1)
+                    Debug.WriteLine("proceeding to deeper scan");
+                d += 1;
+            }
+            return next;
         }
-        
 
+        private int[] search(int x, int y, int thresh)
+        {
+            //Debug.WriteLine("search " + thresh);
+            int d = thresh;
+            int xtemp = x - d;
+            int ytemp = y - d;
+            int[] test = new int[2];
+            test[0] = -1;
+            test[0] = -1;
+            if (thresh > 0)
+            {
+                while (xtemp <= x + d && (test == null || test[0] == -1))
+                {
+                    //Debug.WriteLine("while 1 ");
+                    test = check(new int[2]{xtemp, ytemp});
+                    xtemp += 1;
+                }
+                xtemp = x + d; ytemp = y - d + 1;
+                while (ytemp <= y + d - 1 && (test == null || test[0] == -1))
+                {
+                    //Debug.WriteLine("while 2 ");
+                    test = check(new int[2] { xtemp, ytemp });
+                    ytemp += 1;
+                }
+                ytemp = y + d;
+                while (xtemp >= x - d && (test == null || test[0] == -1))
+                {
+                    //Debug.WriteLine("while 3 ");
+                    test = check(new int[2] { xtemp, ytemp });
+                    xtemp -= 1;
+                }
+                xtemp = x - d; ytemp = y + d - 1;
+                while (ytemp >= y - d + 1 && (test == null || test[0] == -1))
+                {
+                    //Debug.WriteLine("while 4 ");
+                    test = check(new int[2] { xtemp, ytemp });
+                    ytemp -= 1;
+                }
+            }
+            return test;
+        }
 
-
+        private int[] check(int[] temp)
+        {
+            int x = temp[0];
+            int y = temp[1];
+            if(x-1 >= 0 && (y-1) >= 0 && x+1 < width && y+1 < height)
+            {
+                //Debug.WriteLine("X " + x + "   Y " + y);
+                if (edgeData[x-1, y-1])
+                {
+                    return new int[2] { x-1, y-1};
+                }
+                else if (edgeData[x, y-1])
+                {
+                    return new int[2] { x, y-1};
+                }
+                else if (edgeData[x-1, y])
+                {
+                    return new int[2] { x-1, y };
+                }
+                else if (edgeData[x+1, y])
+                {
+                    return new int[2] { x+1, y };
+                }
+                else if (edgeData[x+1, y+1])
+                {
+                    return new int[2] { x+1, y+1 };
+                }
+                else if (edgeData[x, y+1])
+                {
+                    return new int[2] { x, y+1 };
+                }
+                else if (edgeData[x+1, y-1])
+                {
+                    return new int[2] { x+1, y-1};
+                }
+                else if (edgeData[x-1, y+1])
+                {
+                    return new int[2] { x-1, y+1};
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 }
+
