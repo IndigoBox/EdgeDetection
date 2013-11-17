@@ -33,9 +33,12 @@ namespace ImageRecognition
         Image pic; //the first image, which the user loads
         Image pic2; //the second image, which displays the edges
         float percentageInt; //the acceptance value, given by the user
-        Stopwatch clock;
+        Stopwatch clock; //timer1 for the analyze method
+        Stopwatch clock2; //timer2 for the separate method
         Boolean[,] edgeData;
-        ArrayList edges = new ArrayList();
+        Boolean[,] edgeDataHolder; //holds edge data while edge data is being modified so it can reset
+        Color[] groupColors; //colors for edge groups
+        ArrayList edgeGroups = new ArrayList();
         int width;
         int height;
         int pixelThresh;
@@ -45,6 +48,7 @@ namespace ImageRecognition
         {
             Debug.WriteLine("form loaded");
             InitializeComponent();
+            groupColors = new Color[] { Color.Red, Color.Blue, Color.Green, Color.Yellow, Color.Pink, Color.Purple, Color.Orange, Color.Brown };
         }
 
         private static Image resizeImage(Image imgToResize, Size size)
@@ -100,7 +104,7 @@ namespace ImageRecognition
             analyze();
             clock.Stop();
             float time = clock.ElapsedMilliseconds;
-            label3.Text = time / 1000 + " sec";
+            label3.Text = "Analyze: " + time / 1000 + " sec";
         }
 
 
@@ -152,11 +156,11 @@ namespace ImageRecognition
         private unsafe static bool IsEdgeOptimized(byte* pp, byte* cp, byte* np, int scaledPercent)
         {
             return !IsMatching(cp, pp - 3, scaledPercent) &&
-                   //!IsMatching(cp, pp, scaledPercent) &&
-                   //!IsMatching(cp, pp + 3, scaledPercent) &&
-                   //!IsMatching(cp, cp - 3, scaledPercent) &&
-                   //!IsMatching(cp, cp + 3, scaledPercent) &&
-                   //!IsMatching(cp, np - 3, scaledPercent) &&
+                //!IsMatching(cp, pp, scaledPercent) &&
+                //!IsMatching(cp, pp + 3, scaledPercent) &&
+                //!IsMatching(cp, cp - 3, scaledPercent) &&
+                //!IsMatching(cp, cp + 3, scaledPercent) &&
+                //!IsMatching(cp, np - 3, scaledPercent) &&
                    !IsMatching(cp, np, scaledPercent) &&
                    !IsMatching(cp, np + 3, scaledPercent);
         }
@@ -177,7 +181,11 @@ namespace ImageRecognition
         private void button5_MouseClick(object sender, MouseEventArgs e)
         {
             pixelThresh = int.Parse(textBox2.Text);
+            clock2 = Stopwatch.StartNew();
             separateEdges();
+            clock2.Stop();
+            float time = clock2.ElapsedMilliseconds;
+            label5.Text = "Separate: " + time / 1000 + " sec";
         }
 
         private void analyze()
@@ -228,7 +236,7 @@ namespace ImageRecognition
             pic2 = new Bitmap(tempWidth, tempHeight);
             Bitmap img2 = (Bitmap)pic2;
             Color[] pixels = null;
-            
+
             BitmapData data = img.LockBits(new Rectangle(0, 0, img.Width, img.Height),
             ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
 
@@ -239,41 +247,41 @@ namespace ImageRecognition
             Debug.WriteLine("percent " + scaledPercent);
             unsafe
             {
-                    Debug.WriteLine("Woah there, unsafe stuff");
-                    byte* prevLine = (byte*)data.Scan0;
-                    byte* currLine = prevLine + data.Stride;
-                    byte* nextLine = currLine + data.Stride;
+                Debug.WriteLine("Woah there, unsafe stuff");
+                byte* prevLine = (byte*)data.Scan0;
+                byte* currLine = prevLine + data.Stride;
+                byte* nextLine = currLine + data.Stride;
 
-                    for (int y = 1; y < img.Height - 1; y++)
+                for (int y = 1; y < img.Height - 1; y++)
+                {
+
+                    byte* pp = prevLine + 3;
+                    byte* cp = currLine + 3;
+                    byte* np = nextLine + 3;
+                    for (int x = 1; x < img.Width - 1; x++)
                     {
-
-                        byte* pp = prevLine + 3;
-                        byte* cp = currLine + 3;
-                        byte* np = nextLine + 3;
-                        for (int x = 1; x < img.Width - 1; x++)
+                        if (IsEdgeOptimized(pp, cp, np, scaledPercent))
                         {
-                            if (IsEdgeOptimized(pp, cp, np, scaledPercent))
-                            {
-                                edgeData[x, y] = true;
-                                //Debug.WriteLine("x " + x + "y " + y);
-                                
-                                //img2.SetPixel(x, y, Color.Black);
-                                //bytes[(y * img.Width + x) * 3 + 2] = 255;
-                            }
-                            else
-                            {
-                                bytes[(y * data.Stride) + (x * 3)] = 255;
-                                bytes[(y * data.Stride) + (x * 3) +1] = 255;
-                                bytes[(y * data.Stride) + (x * 3) + 2] = 255;
-                                //img2.SetPixel(x, y, Color.White);
-                            }
-                            pp += 3; cp += 3; np += 3;
+                            edgeData[x, y] = true;
+                            //Debug.WriteLine("x " + x + "y " + y);
+
+                            //img2.SetPixel(x, y, Color.Black);
+                            //bytes[(y * img.Width + x) * 3 + 2] = 255;
                         }
-                        prevLine = currLine;
-                        currLine = nextLine;
-                        nextLine += data.Stride;
+                        else
+                        {
+                            bytes[(y * data.Stride) + (x * 3)] = 255;
+                            bytes[(y * data.Stride) + (x * 3) + 1] = 255;
+                            bytes[(y * data.Stride) + (x * 3) + 2] = 255;
+                            //img2.SetPixel(x, y, Color.White);
+                        }
+                        pp += 3; cp += 3; np += 3;
                     }
+                    prevLine = currLine;
+                    currLine = nextLine;
+                    nextLine += data.Stride;
                 }
+            }
             System.Runtime.InteropServices.Marshal.Copy(bytes, 0, data.Scan0, size);
             img.UnlockBits(data);
             pictureBox2.Image = img;
@@ -281,154 +289,218 @@ namespace ImageRecognition
 
         private void separateEdges()
         {
-            Boolean red = false;
+            int color = -1;
             Color temp = Color.Blue;
+            edgeDataHolder = edgeData;
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
                     if (edgeData[x, y])
                     {
-                        red = !red;
-                        if (red)
-                            temp = Color.Red;
-                        else
-                            temp = Color.Blue;
-                        //cycle clockwise from (x-1, y-1)
-                        int[] next = new int[2]{x,y};
-                        edgeData[next[0], next[1]] = false;
-                        img.SetPixel(next[0], next[1], temp);
-                        while (next != null && next[0] != -1)
+                        color++;
+                        if (color == groupColors.Length)
                         {
-                            //Debug.WriteLine("while");
-                            try
+                            color = 0;
+                        }
+                        temp = groupColors[color];
+
+                        //make a new edge group, and add all edges to the group as they are found
+                        EdgeGroup group = new EdgeGroup(new Edge(x, y));
+                        edgeGroups.Add(group);
+
+                        //cycle clockwise from (x-1, y-1)
+                        ArrayList edgeGroup = new ArrayList();
+
+                        ArrayList toScan = new ArrayList(); //contains all pixels that need scanning
+                        toScan.Add(new Edge(x, y));
+
+                        ArrayList tempE = new ArrayList(); //contains all pixels to be added to toScan at the end of cycle
+                        Edge[] holder; //holds edges from scan
+
+
+                        int[] next = new int[2] { x, y };
+                        edgeData[x, y] = false;
+                        img.SetPixel(x, y, temp);
+
+                        while (toScan.Count > 0) //one run of the inside of this loop is a cycle
+                        {
+                            for (int i = 0; i < toScan.Count; i++)
                             {
-                                //Debug.WriteLine("next x " + next[0] + " y " + next[1]);
-                                edgeData[next[0], next[1]] = false;
-                                img.SetPixel(next[0], next[1], temp);
+                                int xT = ((Edge)toScan[i]).getX();
+                                int yT = ((Edge)toScan[i]).getY();
+                                try
+                                {
+                                    img.SetPixel(xT, yT, temp);
+                                }
+                                catch
+                                {
+
+                                }
+                                holder = scan(new int[] { xT, yT }, pixelThresh);
+
+                                for (int q = 0; q < holder.Length; q++)
+                                {
+                                    tempE.Add(holder[q]);
+                                    //Debug.WriteLine("edge [" + q + "]" + "x" + holder[q].getX() + " y " + holder[0].getY());
+                                }
                             }
-                            catch (IndexOutOfRangeException)
-                            {
-                                Debug.WriteLine("index out of range    x " + next[0] + " y " + next[1]);
-                            }
-                            next = scan(next, pixelThresh);
+
+                            toScan = (ArrayList)tempE.Clone();
+                            tempE = new ArrayList();
                         }
                     }
                 }
             }
+            edgeData = edgeDataHolder;
             pictureBox1.Image = img;
         } //end separate
 
-        private int[] scan(int[] temp, int thresh)
+        private Edge[] scan(int[] temp, int thresh)
         {
-            
+            Edge[] edgeT;
+            ArrayList edges = new ArrayList();
+
             int x = temp[0];
             int y = temp[1];
-            int d = 2;
-            int[] next = new int[2]{-1, -1};
+            int d = 1;
             //Debug.WriteLine("array " + next[0]);
-            while (next != null && next[0] == -1 &&  d < thresh)
+            while (d < thresh)
             {
                 //Debug.WriteLine("scan depth " + d);
-                next = search(x, y, d);
-                if (next == null || next[0] == -1)
-                    Debug.WriteLine("proceeding to deeper scan");
+                edgeT = search(x, y, d);
+                if (edgeT != null && edgeT.Length != 0)
+                {
+                    for (int i = 0; i < edgeT.Length; i++)
+                    {
+                        edges.Add(edgeT[i]);
+                    }
+                }
                 d += 1;
             }
-            return next;
+
+            Edge[] output = new Edge[edges.Count];
+            for (int i = 0; i < edges.Count; i++)
+            {
+                output[i] = (Edge)edges[i];
+            }
+
+            return output;
         }
 
-        private int[] search(int x, int y, int thresh)
+        private Edge[] search(int x, int y, int thresh)
         {
             //Debug.WriteLine("search " + thresh);
+            ArrayList edgeTemp = new ArrayList();
+            Edge[] output;
+            int edgeNumber = 0; //the number of discovered edges
+
             int d = thresh;
             int xtemp = x - d;
+            if (xtemp < 0)
+            {
+                xtemp = 0;
+            }
             int ytemp = y - d;
-            int[] test = new int[2];
-            test[0] = -1;
-            test[0] = -1;
+            if (ytemp < 0)
+            {
+                ytemp = 0;
+            }
             if (thresh > 0)
             {
-                while (xtemp <= x + d && (test == null || test[0] == -1))
+                while (xtemp <= x + d)
                 {
                     //Debug.WriteLine("while 1 ");
-                    test = check(new int[2]{xtemp, ytemp});
+                    if (xtemp >= 0 && ytemp >= 0 && edgeData[xtemp, ytemp])
+                    {
+                        edgeTemp.Add(new Edge(xtemp, ytemp));
+                        edgeNumber += 1;
+                    }
                     xtemp += 1;
                 }
                 xtemp = x + d; ytemp = y - d + 1;
-                while (ytemp <= y + d - 1 && (test == null || test[0] == -1))
+                while (ytemp <= y + d - 1)
                 {
                     //Debug.WriteLine("while 2 ");
-                    test = check(new int[2] { xtemp, ytemp });
+                    if (xtemp >= 0 && ytemp >= 0 && edgeData[xtemp, ytemp])
+                    {
+                        edgeTemp.Add(new Edge(xtemp, ytemp));
+                        edgeNumber += 1;
+                    }
                     ytemp += 1;
                 }
                 ytemp = y + d;
-                while (xtemp >= x - d && (test == null || test[0] == -1))
+                while (xtemp >= x - d)
                 {
                     //Debug.WriteLine("while 3 ");
-                    test = check(new int[2] { xtemp, ytemp });
+                    if (xtemp >= 0 && ytemp >= 0 && edgeData[xtemp, ytemp])
+                    {
+                        edgeTemp.Add(new Edge(xtemp, ytemp));
+                        edgeNumber += 1;
+                    }
                     xtemp -= 1;
                 }
                 xtemp = x - d; ytemp = y + d - 1;
-                while (ytemp >= y - d + 1 && (test == null || test[0] == -1))
+                while (ytemp >= y - d + 1)
                 {
                     //Debug.WriteLine("while 4 ");
-                    test = check(new int[2] { xtemp, ytemp });
+                    if (xtemp >= 0 && ytemp >= 0 && edgeData[xtemp, ytemp])
+                    {
+                        edgeTemp.Add(new Edge(xtemp, ytemp));
+                        edgeNumber += 1;
+                    }
                     ytemp -= 1;
                 }
             }
-            return test;
+
+            output = new Edge[edgeNumber];
+            for (int i = 0; i < edgeNumber; i++)
+            {
+                output[i] = (Edge)edgeTemp[i];
+                edgeData[output[i].getX(), output[i].getY()] = false;
+                //Debug.WriteLine("edge [" + i + "]" + "x" + output[i].getX() + " y " + output[0].getY());
+            }
+
+            return output;
+        }
+    } // end class dual Image form
+
+    public class EdgeGroup
+    {
+        ArrayList edges;
+        Color color;
+
+        public EdgeGroup(Edge first)
+        {
+            edges = new ArrayList();
+            edges.Add(first);
         }
 
-        private int[] check(int[] temp)
+        public void add(Edge addEdge)
         {
-            int x = temp[0];
-            int y = temp[1];
-            if(x-1 >= 0 && (y-1) >= 0 && x+1 < width && y+1 < height)
-            {
-                //Debug.WriteLine("X " + x + "   Y " + y);
-                if (edgeData[x-1, y-1])
-                {
-                    return new int[2] { x-1, y-1};
-                }
-                else if (edgeData[x, y-1])
-                {
-                    return new int[2] { x, y-1};
-                }
-                else if (edgeData[x-1, y])
-                {
-                    return new int[2] { x-1, y };
-                }
-                else if (edgeData[x+1, y])
-                {
-                    return new int[2] { x+1, y };
-                }
-                else if (edgeData[x+1, y+1])
-                {
-                    return new int[2] { x+1, y+1 };
-                }
-                else if (edgeData[x, y+1])
-                {
-                    return new int[2] { x, y+1 };
-                }
-                else if (edgeData[x+1, y-1])
-                {
-                    return new int[2] { x+1, y-1};
-                }
-                else if (edgeData[x-1, y+1])
-                {
-                    return new int[2] { x-1, y+1};
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            else
-            {
-                return null;
-            }
+            edges.Add(addEdge);
         }
     }
-}
+
+    public class Edge
+    {
+        int x; int y;
+
+        public Edge(int x_in, int y_in)
+        {
+            x = x_in;
+            y = y_in;
+        }
+
+        public int getX()
+        {
+            return x;
+        }
+
+        public int getY()
+        {
+            return y;
+        }
+    }
+}//end namespace
 

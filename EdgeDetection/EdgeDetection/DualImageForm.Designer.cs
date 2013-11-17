@@ -45,6 +45,8 @@
             this.button5 = new System.Windows.Forms.Button();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.timer2 = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
@@ -150,13 +152,13 @@
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(905, 150);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(33, 13);
+            this.label3.Size = new System.Drawing.Size(76, 13);
             this.label3.TabIndex = 11;
-            this.label3.Text = "0 sec";
+            this.label3.Text = "Analyze: 0 sec";
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(905, 222);
+            this.button5.Location = new System.Drawing.Point(905, 253);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(90, 23);
             this.button5.TabIndex = 12;
@@ -166,7 +168,7 @@
             // 
             // textBox2
             // 
-            this.textBox2.Location = new System.Drawing.Point(905, 196);
+            this.textBox2.Location = new System.Drawing.Point(905, 227);
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(100, 20);
             this.textBox2.TabIndex = 13;
@@ -175,11 +177,20 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(905, 177);
+            this.label4.Location = new System.Drawing.Point(905, 208);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(65, 13);
             this.label4.TabIndex = 14;
             this.label4.Text = "Pixel Thresh";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(905, 279);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(82, 13);
+            this.label5.TabIndex = 11;
+            this.label5.Text = "Separate: 0 sec";
             // 
             // DualImageForm
             // 
@@ -189,6 +200,7 @@
             this.Controls.Add(this.label4);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.button5);
+            this.Controls.Add(this.label5);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.comboBox1);
@@ -229,5 +241,7 @@
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Timer timer2;
     }
 }
