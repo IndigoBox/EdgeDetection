@@ -155,14 +155,14 @@ namespace ImageRecognition
 
         private unsafe static bool IsEdgeOptimized(byte* pp, byte* cp, byte* np, int scaledPercent)
         {
-            return !IsMatching(cp, pp - 3, scaledPercent) &&
-                //!IsMatching(cp, pp, scaledPercent) &&
-                //!IsMatching(cp, pp + 3, scaledPercent) &&
-                //!IsMatching(cp, cp - 3, scaledPercent) &&
-                //!IsMatching(cp, cp + 3, scaledPercent) &&
-                //!IsMatching(cp, np - 3, scaledPercent) &&
-                   !IsMatching(cp, np, scaledPercent) &&
-                   !IsMatching(cp, np + 3, scaledPercent);
+            return !(IsMatching(cp, pp - 3, scaledPercent) &&
+                    //IsMatching(cp, pp, scaledPercent) &&
+                    //IsMatching(cp, pp + 3, scaledPercent) &&
+                    IsMatching(cp, cp - 3, scaledPercent) &&
+                    //IsMatching(cp, cp + 3, scaledPercent) &&
+                    IsMatching(cp, np - 3, scaledPercent) &&
+                    IsMatching(cp, np, scaledPercent) &&
+                    IsMatching(cp, np + 3, scaledPercent));
         }
 
         private unsafe static bool IsMatching(byte* p1, byte* p2, int thresh)
