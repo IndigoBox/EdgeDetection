@@ -16,6 +16,7 @@
 
 ### Things I want to do
 
+ - Add Webcam Support
  - Improve efficiency
  - Create threshold detection (a dark image with mostly dark
  colors will be analyzed in higher detail then one that is

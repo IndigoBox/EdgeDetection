@@ -26,6 +26,8 @@ using System.Windows.Forms;
 using System.Drawing.Imaging;
 using System.Diagnostics;
 
+using DirectShowLib; //
+
 namespace ImageRecognition
 {
     public partial class DualImageForm : Form
