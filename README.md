@@ -1,20 +1,13 @@
-##Lines - Open Source Edge Detection
+# Lines - Open Source Edge Detection
 
->Lines is a simple edge detection software which analyzes an image
->and detects edges, which it displays as black pixels in the second 
->image slot. Lines can also run a separate algorithm on the image
->after it has been analyed, which attempts to split the image into
->separate objects, or at least separate groups of edges. Lines is
->completely open source, and all code for it is 
->right here on GitHub! To find out more on how you may use and 
->distribute Lines, please look at the licensing notes.
+Lines is a simple edge detection software which analyzes an image and detects edges, which it displays as black pixels in the second image slot. Lines can also run a separate algorithm on the image after it has been analyed, which attempts to split the image into separate objects, or at least separate groups of edges. Lines is completely open source, and all code for it is right here on GitHub! To find out more on how you may use and distribute Lines, please look at the licensing notes.
 
 ### Current Features
 
 - Analyze images for edges, detecting contrast in the image
 - Separate groups of edge pixels in the images, and color them
 
-### Things I want to do
+### Planned Features
 
  - Add Webcam Support
  - Improve efficiency
